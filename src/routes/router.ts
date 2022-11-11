@@ -1,24 +1,13 @@
 import express from 'express';
-import DB from '../db/db.js';
 import loadJSON from '../utils/loadJSON.js';
-
+import { applyRoutes } from './express-helpers.js';
+import routes from './routes.js';
 const { version } = loadJSON('../../package.json');
 
 const router = express();
-const PORT = process.env.PORT || 4000;
+router.use(express.json());
+router.get('/', (req, res) => res.json(version));
 
-router.get('/', (req, res, next) => {
-  res.json(version);
-});
-
-router.get('/directories', (req, res) => {
-  res.json(DB.collections.map((d) => d.name));
-});
-
-router.put('/directory', (req, res, next) => {
-  res.send('papa');
-});
-
-router.listen(PORT, () => console.log(`http://localhost:${PORT}/`));
+applyRoutes(router, routes);
 
 export default router;
