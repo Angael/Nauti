@@ -1,4 +1,3 @@
-import router from './routes/router.js';
+import MyRouter from './routes/MyRouter.js';
 
-const PORT = process.env.PORT || 4000;
-router.listen(PORT, () => console.log(`http://localhost:${PORT}/`));
+MyRouter.start();

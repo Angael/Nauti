@@ -1,33 +1,36 @@
-import { Delays, greeter } from '../src/utils/greeter.js';
+// import { Delays, greeter } from '../src/utils/greeter.js';
 
-describe('greeter function', () => {
-  const name = 'John';
-  let hello: string;
-
-  let timeoutSpy: jest.SpyInstance;
-
-  beforeAll(async () => {
-    jest.useFakeTimers();
-    timeoutSpy = jest.spyOn(global, 'setTimeout');
-
-    const p: Promise<string> = greeter(name);
-    jest.runOnlyPendingTimers();
-    hello = await p;
+describe('e.g. test', () => {
+  it('should test something', () => {
+    expect(true).toBe(true);
   });
-
-  afterAll(() => {
-    timeoutSpy.mockRestore();
-  });
-
-  it('delays the greeting by 2 seconds', () => {
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenLastCalledWith(
-      expect.any(Function),
-      Delays.Long,
-    );
-  });
-
-  it('greets a user with `Hello, {name}` message', () => {
-    expect(hello).toBe(`Hello, ${name}`);
-  });
+  // const name = 'John';
+  // let hello: string;
+  //
+  // let timeoutSpy: jest.SpyInstance;
+  //
+  // beforeAll(async () => {
+  //   jest.useFakeTimers();
+  //   timeoutSpy = jest.spyOn(global, 'setTimeout');
+  //
+  //   const p: Promise<string> = greeter(name);
+  //   jest.runOnlyPendingTimers();
+  //   hello = await p;
+  // });
+  //
+  // afterAll(() => {
+  //   timeoutSpy.mockRestore();
+  // });
+  //
+  // it('delays the greeting by 2 seconds', () => {
+  //   expect(setTimeout).toHaveBeenCalledTimes(1);
+  //   expect(setTimeout).toHaveBeenLastCalledWith(
+  //     expect.any(Function),
+  //     Delays.Long,
+  //   );
+  // });
+  //
+  // it('greets a user with `Hello, {name}` message', () => {
+  //   expect(hello).toBe(`Hello, ${name}`);
+  // });
 });

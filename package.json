@@ -39,7 +39,9 @@
   },
   "author": "Angael",
   "dependencies": {
+    "@types/fs-extra": "^9.0.13",
     "express": "^4.18.2",
+    "fs-extra": "^10.1.0",
     "lokijs": "^1.5.12",
     "nanoid": "^4.0.0",
     "tslib": "~2.4"
