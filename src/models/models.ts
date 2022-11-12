@@ -4,7 +4,6 @@ export enum DBS {
 }
 
 export interface IDirectory {
-  id: string;
   path: string;
 }
 
@@ -21,13 +20,11 @@ export type FileData = {
 };
 
 export interface IFile {
-  id: string;
   path: string;
-  size: number;
-  processed: 'no' | 'v1';
-  addedISO: string; // iso date
-  lastSeenISO: string; // iso date
+  dirId: number; // lokiId
+  size?: number;
+  lastSeen?: number; // Date.now()
   preview?: Preview;
   data?: FileData;
-  tags: string[];
+  tags?: string[];
 }

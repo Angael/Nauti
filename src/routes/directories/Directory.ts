@@ -1,23 +1,27 @@
 import { IDirectory, IFile } from '../../models/models.js';
 import fg from 'fast-glob';
-import { join } from 'path';
 import { directoryDB } from '../../db/db.js';
+import { MyFile } from '../files/MyFile.js';
 
 export class Directory implements IDirectory {
-  id: string;
   path: string;
 
-  constructor(id, path) {
-    this.id = id;
+  constructor(path) {
     this.path = path;
   }
 
+  get(): IDirectory & LokiObj {
+    return directoryDB().findOne({
+      path: this.path,
+    });
+  }
+
   exists(): boolean {
-    const searchResult = directoryDB.find({
+    const searchResult = directoryDB().find({
       path: this.path,
     });
 
-    return !!searchResult;
+    return searchResult.length > 0;
   }
 
   async scanPath(): Promise<IFile[]> {
@@ -30,13 +34,12 @@ export class Directory implements IDirectory {
         deep: 1,
         cwd: this.path,
       });
-
-      files = files.map((name) => join(this.path, name));
     } catch (e) {
       console.error('failed to scanPath', this.path);
     }
 
-    console.log(files);
-    return [];
+    const dir = this.get();
+
+    return files.map((path) => new MyFile(dir, path));
   }
 }

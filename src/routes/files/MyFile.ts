@@ -1,22 +1,26 @@
 import { FileData, IFile, Preview } from '../../models/models.js';
-// import fg from 'fast-glob';
-// import { join } from 'path';
+import { join } from 'path';
+import { directoryDB } from '../../db/db.js';
 
 export class MyFile implements IFile {
-  id: string;
   path: string;
-  size: number;
-  processed: 'no' | 'v1';
-  addedISO: string; // iso date
-  lastSeenISO: string; // iso date
+  dirId: LokiObj['$loki'];
+  size?: number;
+  lastSeen?: number; // Date.now()
   preview?: Preview;
   data?: FileData;
-  tags: string[];
+  tags?: string[];
 
-  // constructor(id, path) {
-  //   this.id = id;
-  //   this.path = path;
-  // }
+  get fullPath() {
+    const dirPath = directoryDB().findOne({ $loki: this.dirId }).path;
+    return join(dirPath, this.path);
+  }
+
+  constructor(dirId: LokiObj, path: string) {
+    this.dirId = dirId.$loki;
+    this.path = path;
+  }
+
   //
   // async scanPath(): Promise<IFile[]> {
   //   let files: string[];

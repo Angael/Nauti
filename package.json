@@ -43,7 +43,11 @@
     "express": "^4.18.2",
     "fs-extra": "^10.1.0",
     "lokijs": "^1.5.12",
+    "modern-async": "^1.1.2",
     "nanoid": "^4.0.0",
+    "node-cache": "^5.1.2",
+    "p-queue": "^7.3.0",
+    "simple-node-logger": "^21.8.12",
     "tslib": "~2.4"
   }
 }
