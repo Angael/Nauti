@@ -1,12 +1,14 @@
 import fs from 'fs-extra';
 import PQueue from 'p-queue';
-import log from '../utils/log.js';
+import logger from '../utils/log.js';
 import DirModel from '../db/models/DirModel.js';
 import { IDirectory } from '../models/models.js';
 import { getFilesInDir } from '../routes/directories/dirFns.js';
 import { Document } from 'mongoose';
 import { join } from 'path';
 import FileModel from '../db/models/FileModel.js';
+import { forEach } from 'modern-async';
+import { subMinutes } from 'date-fns';
 
 class SyncDirs {
   dirQueue = new PQueue({
@@ -34,91 +36,68 @@ class SyncDirs {
 
   constructor() {
     fs.mkdir('./temp/preview/xs/', { recursive: true });
+
+    this.newFileQueue.on('active', () => {
+      logger.debug('newFileQueue size: %s', this.newFileQueue.size);
+    });
   }
 
   start() {
+    logger.info(`SyncDirs started`);
     this.queueUpdates();
   }
 
   async queueUpdates() {
-    log.debug(`[queueUpdates]`);
-    const dirs: IDirectory[] = await DirModel.find();
+    const dirs: IDirectory[] = await DirModel.find({
+      lastUpdated: { $lt: subMinutes(new Date(), 30) },
+    });
+    logger.debug(
+      `update dirs %O`,
+      dirs.map((d) => d.path),
+    );
     dirs.forEach((dir) => this.queueDirUpdate(dir.path));
-    log.debug(`[queueUpdates] ${dirs.length} dirs`);
   }
 
   async queueDirUpdate(path: string) {
     const dir = await DirModel.findOne({ path });
 
     if (dir) {
-      this.dirQueue.add(() => this.updateFilesInDir(path, dir));
+      this.dirQueue.add(() => this.syncFilesInDir(dir));
     } else {
-      log.error('[queueDirUpdate] Dir doesnt exist:', path);
+      logger.error('[queueDirUpdate] Dir doesnt exist:', path);
       throw new Error('dir not found');
     }
   }
 
-  async updateFilesInDir(path: string, dir: IDirectory & Document) {
-    log.debug('[updateFilesInDir] ', path);
+  async syncFilesInDir(dir: IDirectory & Document) {
+    logger.debug('sync %s', dir.path);
 
-    const filesInDir = await getFilesInDir(path);
+    const filesInDir = await getFilesInDir(dir.path);
 
-    filesInDir.forEach((filePath) => {
-      this.newFileQueue.add(() => this.updateDir(filePath, dir));
-    });
-    // const Dir = new Directory(path).get();
-    // log.info('[SyncDirs] Updating scannedFiles for ', path);
-    //
-    // const scannedFiles = await new Directory(path).scanPath();
-    // log.info(`[SyncDirs] found ${scannedFiles.length} files`);
-    //
-    // const newFiles = scannedFiles.filter(
-    //   (file) => !fileDB().findOne({ dirId: Dir.$loki, path: file.path }),
-    // );
-    // log.info(`[SyncDirs] ${newFiles.length} newFiles`);
-    //
-    // const removedFiles = fileDB().find({
-    //   dirId: Dir.$loki,
-    //   path: { $nin: scannedFiles.map((f) => f.path) },
-    // });
-    // log.info(`[SyncDirs] ${removedFiles.length} removedFiles`);
-    //
-    // newFiles.forEach((file) => {
-    //   try {
-    //     fileDB().insert(file);
-    //   } catch (e) {
-    //     log.trace(e.message);
-    //   }
-    // });
-    //
-    // removedFiles.forEach((file) => {
-    //   try {
-    //     fileDB().remove(file);
-    //   } catch (e) {
-    //     log.trace(e.message);
-    //   }
-    // });
-    //
-    // DB.saveDatabase();
+    logger.debug('queue %s files', filesInDir.length);
+    await forEach(filesInDir, (filePath) =>
+      this.newFileQueue.add(() => this.ensureFileInDB(filePath, dir)),
+    );
+
+    dir.lastUpdated = new Date();
+    await dir.save();
+    logger.info(`Updated dir %s`, dir.path);
   }
 
-  async updateDir(path: string, dir: IDirectory & Document) {
-    this.newFileQueue.add(async () => {
-      log.debug(join(dir.path, path));
+  async ensureFileInDB(path: string, dir: IDirectory & Document) {
+    const fullpath = join(dir.path, path);
 
-      const exists = await FileModel.exists({
+    const exists = await FileModel.exists({ path, dirId: dir._id });
+    if (!exists) {
+      logger.debug('creating file %s', fullpath);
+      const stat = await fs.stat(fullpath);
+
+      await FileModel.create({
         path,
         dirId: dir._id,
+        size: stat.size,
       });
-
-      log.debug(`exists: ${exists}`);
-      if (!exists) {
-        await FileModel.create({
-          path,
-          dirId: dir._id,
-        });
-      }
-    });
+    }
   }
 }
 

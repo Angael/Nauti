@@ -3,6 +3,7 @@ import DirModel from '../../db/models/DirModel.js';
 import { Document } from 'mongoose';
 import { IDirectory } from '../../models/models.js';
 import SyncDirs from '../../auto-services/SyncDirs.js';
+import logger from '../../utils/log.js';
 
 export async function insertDir(path: string): Promise<Document> {
   if (await DirModel.exists({ path })) {
@@ -37,7 +38,7 @@ export async function getFilesInDir(path: string): Promise<string[]> {
       cwd: path,
     });
   } catch (e) {
-    console.error('failed to scanPath', path, e);
+    logger.error(e);
   }
 
   return files;

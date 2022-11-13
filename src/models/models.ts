@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 
 export interface IDirectory {
   path: string;
+  lastUpdated: Date;
 }
 
 export type Preview = {
