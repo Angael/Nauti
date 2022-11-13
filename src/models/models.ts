@@ -25,4 +25,5 @@ export interface IFile {
   preview?: Preview;
   data?: FileData;
   tags?: string[];
+  rating?: number;
 }

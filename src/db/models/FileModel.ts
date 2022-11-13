@@ -17,6 +17,7 @@ const schema = new Schema<IFile>({
   lastSeen: Date,
   size: Number,
   tags: [String],
+  rating: Number,
 });
 schema.index({ path: 1, dirId: 1 }, { unique: true });
 

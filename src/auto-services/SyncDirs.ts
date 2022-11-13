@@ -16,7 +16,7 @@ class SyncDirs {
   });
 
   newFileQueue = new PQueue({
-    concurrency: 1,
+    concurrency: 5,
   });
 
   checkOldFilesQueue = new PQueue({
@@ -49,7 +49,7 @@ class SyncDirs {
 
   async queueUpdates() {
     const dirs: IDirectory[] = await DirModel.find({
-      lastUpdated: { $lt: subMinutes(new Date(), 30) },
+      lastUpdated: { $lt: subMinutes(new Date(), 60) },
     });
     logger.debug(
       `update dirs %O`,
@@ -70,11 +70,9 @@ class SyncDirs {
   }
 
   async syncFilesInDir(dir: IDirectory & Document) {
-    logger.debug('sync %s', dir.path);
-
     const filesInDir = await getFilesInDir(dir.path);
 
-    logger.debug('queue %s files', filesInDir.length);
+    logger.info('sync %s, files: %s', dir.path, filesInDir.length);
     await forEach(filesInDir, (filePath) =>
       this.newFileQueue.add(() => this.ensureFileInDB(filePath, dir)),
     );

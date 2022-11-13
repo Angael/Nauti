@@ -22,4 +22,20 @@ export const filesRoutes: MyRoute[] = [
       res.json(await findFile(id));
     },
   },
+  {
+    method: 'post',
+    path: '/file/:id/rate',
+    handler: async (req, res) => {
+      // WIP
+      const { id, rating } = req.params;
+      if (typeof id !== 'string' && typeof id !== 'number') {
+        res.sendStatus(400);
+        return;
+      }
+
+      console.log(id, rating);
+
+      res.json(await findFile(id));
+    },
+  },
 ];
