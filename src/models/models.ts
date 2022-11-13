@@ -1,7 +1,4 @@
-export enum DBS {
-  directory = 'directory',
-  files = 'files',
-}
+import { Types } from 'mongoose';
 
 export interface IDirectory {
   path: string;
@@ -21,7 +18,7 @@ export type FileData = {
 
 export interface IFile {
   path: string;
-  dirId: number; // lokiId
+  dirId: Types.ObjectId; // lokiId
   size?: number;
   lastSeen?: number; // Date.now()
   preview?: Preview;

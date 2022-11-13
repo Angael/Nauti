@@ -1,48 +1,45 @@
 import { MyRoute } from '../express-helpers.js';
-import { directoryDB } from '../../db/db.js';
-import { Directory } from './Directory.js';
-import SynchFilesInDirs from '../../auto-services/SyncDirs.js';
+import { findDir, insertDir, listDirs } from './dirFns.js';
+import log from '../../utils/log.js';
 
 export const directoriesRoutes: MyRoute[] = [
   {
     method: 'get',
     path: '/directories',
     handler: async (req, res) => {
-      res.json(directoryDB().find());
+      res.json(await listDirs());
     },
   },
   {
     method: 'put',
     path: '/directory',
     handler: async (req, res) => {
-      const newDic = new Directory(req.body.path);
-
-      if (newDic.exists()) {
-        res.sendStatus(409);
+      if (typeof req.body.path !== 'string') {
+        res.sendStatus(400);
         return;
       }
 
       try {
-        directoryDB().insert(newDic);
-        await SynchFilesInDirs.updateFilesInDir(newDic);
-        res.send(req.body);
+        await insertDir(req.body.path);
+        res.sendStatus(204);
       } catch (e) {
+        log.error(e);
         res.sendStatus(500);
+        return;
       }
     },
   },
   {
     method: 'get',
-    path: '/directory/:lokiId',
+    path: '/directory/:id',
     handler: async (req, res) => {
-      if (!req.params.lokiId) {
+      const id = req.params.id;
+      if (typeof id !== 'string') {
         res.sendStatus(400);
         return;
       }
 
-      const lokiId = Number(req.params.lokiId);
-
-      res.json(directoryDB().findOne({ $loki: lokiId }));
+      res.json(await findDir(id));
     },
   },
 ];

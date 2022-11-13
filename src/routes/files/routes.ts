@@ -1,12 +1,25 @@
 import { MyRoute } from '../express-helpers.js';
-import { fileDB } from '../../db/db.js';
+import { findFile, listFiles } from './fileFns.js';
 
 export const filesRoutes: MyRoute[] = [
   {
     method: 'get',
     path: '/files',
     handler: async (req, res) => {
-      res.json(fileDB().find());
+      res.json(await listFiles());
+    },
+  },
+  {
+    method: 'get',
+    path: '/file/:id',
+    handler: async (req, res) => {
+      const id = req.params.id;
+      if (typeof id !== 'string') {
+        res.sendStatus(400);
+        return;
+      }
+
+      res.json(await findFile(id));
     },
   },
 ];

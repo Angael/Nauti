@@ -4,6 +4,7 @@ import { applyRoutes, MyRoute } from './express-helpers.js';
 import { directoriesRoutes } from './directories/routes.js';
 import { filesRoutes } from './files/routes.js';
 import { statsRoutes } from './stats/routes.js';
+import log from '../utils/log.js';
 
 const { version } = loadJSON('../../package.json');
 
@@ -22,9 +23,10 @@ class MyRouter {
   }
 
   start() {
-    this.router.listen(this.port, () =>
-      console.log(`http://localhost:${this.port}/`),
-    );
+    this.router.listen(this.port, () => {
+      log.info(`Router started`);
+      log.info(`http://localhost:${this.port}/`);
+    });
   }
 }
 
