@@ -26,6 +26,7 @@
     "@types/fs-extra": "^9.0.13",
     "date-fns": "^2.29.3",
     "express": "^4.18.2",
+    "express-validator": "^6.14.2",
     "fs-extra": "^10.1.0",
     "modern-async": "^1.1.2",
     "mongodb": "^4.11.0",

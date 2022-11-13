@@ -1,41 +1,40 @@
-import { MyRoute } from '../express-helpers.js';
 import { findFile, listFiles } from './fileFns.js';
+import { Express } from 'express';
+import { param, body } from 'express-validator';
+import FileModel from '../../db/models/FileModel.js';
 
-export const filesRoutes: MyRoute[] = [
-  {
-    method: 'get',
-    path: '/files',
-    handler: async (req, res) => {
-      res.json(await listFiles());
-    },
-  },
-  {
-    method: 'get',
-    path: '/file/:id',
-    handler: async (req, res) => {
-      const id = req.params.id;
-      if (typeof id !== 'string') {
-        res.sendStatus(400);
-        return;
-      }
+export default (router: Express) => {
+  router.get('/files', async (req, res) => {
+    res.json(await listFiles());
+  });
 
-      res.json(await findFile(id));
-    },
-  },
-  {
-    method: 'post',
-    path: '/file/:id/rate',
-    handler: async (req, res) => {
-      // WIP
-      const { id, rating } = req.params;
-      if (typeof id !== 'string' && typeof id !== 'number') {
-        res.sendStatus(400);
-        return;
-      }
+  router.get('/file/:id', async (req, res) => {
+    const id = req.params.id;
+    if (typeof id !== 'string') {
+      res.sendStatus(400);
+      return;
+    }
 
+    res.json(await findFile(id));
+  });
+
+  router.post(
+    '/file/:id/rate',
+    param('id').isString(),
+    body('rating').isNumeric(),
+    async (req, res) => {
+      const { id } = req.params;
+      const { rating } = req.body;
       console.log(id, rating);
 
+      await FileModel.findOneAndUpdate(
+        { _id: id },
+        {
+          rating,
+        },
+      );
+
       res.json(await findFile(id));
     },
-  },
-];
+  );
+};
