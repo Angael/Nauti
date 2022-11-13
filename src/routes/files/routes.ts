@@ -1,7 +1,6 @@
-import { findFile, listFiles } from './fileFns.js';
+import { findFile, listFiles, rateFile } from './fileFns.js';
 import { Express } from 'express';
-import { param, body } from 'express-validator';
-import FileModel from '../../db/models/FileModel.js';
+import { body, param } from 'express-validator';
 
 export default (router: Express) => {
   router.get('/files', async (req, res) => {
@@ -21,20 +20,11 @@ export default (router: Express) => {
   router.post(
     '/file/:id/rate',
     param('id').isString(),
-    body('rating').isNumeric(),
+    body('rating').isNumeric().isLength({ min: 0, max: 9 }),
     async (req, res) => {
-      const { id } = req.params;
-      const { rating } = req.body;
-      console.log(id, rating);
+      await rateFile(req.params.id, req.body.rating);
 
-      await FileModel.findOneAndUpdate(
-        { _id: id },
-        {
-          rating,
-        },
-      );
-
-      res.json(await findFile(id));
+      res.json(await findFile(req.params.id));
     },
   );
 };

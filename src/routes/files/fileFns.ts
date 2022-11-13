@@ -8,3 +8,7 @@ export async function listFiles(): Promise<IFile[]> {
 export async function findFile(id: string): Promise<IFile> {
   return FileModel.findById(id);
 }
+
+export async function rateFile(id: string, rating: number): Promise<void> {
+  return FileModel.findOneAndUpdate({ _id: id }, { rating });
+}
