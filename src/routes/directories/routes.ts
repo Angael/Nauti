@@ -1,6 +1,6 @@
 import { MyRoute } from '../express-helpers.js';
 import { findDir, insertDir, listDirs } from './dirFns.js';
-import log from '../../utils/log.js';
+import logger from '../../utils/log.js';
 
 export const directoriesRoutes: MyRoute[] = [
   {
@@ -23,9 +23,8 @@ export const directoriesRoutes: MyRoute[] = [
         await insertDir(req.body.path);
         res.sendStatus(204);
       } catch (e) {
-        log.error(e);
+        logger.error('Error: %O', e);
         res.sendStatus(500);
-        return;
       }
     },
   },
